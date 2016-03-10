@@ -53,12 +53,14 @@ def setHeatingSetpoint(temp) {
 
 	def temperatureUnit = device.latestValue('temperatureUnit')
 	def temperature
-	temp=temp.toDouble().round(2)
-	log.debug("setHeatingSetpoint -> Value :: ${temp}° ${temperatureUnit}")
-	
-	if(!isLoggedIn()) {
-		login()
+
+	if (temp!=null){
+		temp=temp.toDouble().round(2)
+		log.debug("setHeatingSetpoint -> Value :: ${temp}° ${temperatureUnit}")
+	}else{
+		temp=null
 	}
+	
 
 	switch (temperatureUnit) {
 		case "celsius":
@@ -89,6 +91,10 @@ def setHeatingSetpoint(temp) {
 }		
 
 def heatingSetpointUp(){
+
+	if(!isLoggedIn()) {
+		login()
+	}
 	
 	def temperatureUnit = device.latestValue('temperatureUnit')
 	
@@ -117,6 +123,10 @@ def heatingSetpointUp(){
 }
 
 def heatingSetpointDown(){
+
+	if(!isLoggedIn()) {
+		login()
+	}
 	
 	def newSetpoint
 	
@@ -335,33 +345,38 @@ def deviceId(){
 def isLoggedIn() {
 
 	log.debug "Is it login?..."
-	try{
-		def params = [
-			uri: "https://dev.neviweb.com",
-		    path: "/api/gateway",
-		   	requestContentType: "application/json, text/javascript, */*; q=0.01",
-		    headers: ['Session-Id' : data.auth.session]
-		]
-			
-		httpGet(params) {resp ->
-		    if(resp.data.sessionExpired==true){
-		    	log.debug "No session Expired"
-		    	data.auth=""
-		    }
-		}
+	if (data.auth.session!=null){
+		try{
+			def params = [
+				uri: "https://dev.neviweb.com",
+			    path: "/api/gateway",
+			   	requestContentType: "application/json, text/javascript, */*; q=0.01",
+			    headers: ['Session-Id' : data.auth.session]
+			]
+				
+			httpGet(params) {resp ->
+			    if(resp.data.sessionExpired==true){
+			    	log.debug "No session Expired"
+			    	data.auth=""
+			    }
+			}
 
-		if(!data.auth) {
+			if(!data.auth) {
+				return false
+				log.error("not pass log")
+			} else {
+				return true
+				log.info("pass log")
+			}
+
+		}catch (e){
+			log.error(e)
 			return false
-			log.error("not pass log")
-		} else {
-			return true
-			log.info("pass log")
 		}
-
-	}catch (e){
-		log.error(e)
-		return false
-	}
+		}else{
+			return false
+		}
+	
 }
 
 def FormatTemp(temp){
