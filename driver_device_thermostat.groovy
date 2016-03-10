@@ -52,6 +52,7 @@ metadata {
 def setHeatingSetpoint(temp) {
 
 	if(!isLoggedIn()) {
+		log.debug "Need to login"
 		login()
 	}
 	
@@ -97,6 +98,7 @@ def setHeatingSetpoint(temp) {
 def heatingSetpointUp(){
 
 	if(!isLoggedIn()) {
+		log.debug "Need to login"
 		login()
 	}
 	
@@ -129,6 +131,7 @@ def heatingSetpointUp(){
 def heatingSetpointDown(){
 
 	if(!isLoggedIn()) {
+		log.debug "Need to login"
 		login()
 	}
 	
@@ -343,13 +346,15 @@ def deviceId(){
     		data.deviceId=var.id
     		log.debug("device ID is :: ${data.deviceId}")
     	}
-    }	
+    }
+    poll()	
 }
 
 def isLoggedIn() {
 
-	log.debug "Is it login?..."
-	if (data.auth.session!=null){
+	log.debug ("Is it login?")
+
+	if (data?.auth?.session!=null){
 		try{
 			def params = [
 				uri: "https://dev.neviweb.com",
@@ -369,17 +374,20 @@ def isLoggedIn() {
 				return false
 				log.error("not pass log")
 			} else {
-				return true
-				log.info("pass log")
+				if (data?.deviceId!=null){
+					return true
+				}else{
+					return false
+				}
 			}
 
 		}catch (e){
 			log.error(e)
 			return false
 		}
-		}else{
-			return false
-		}
+	}else{
+		return false
+	}
 	
 }
 
