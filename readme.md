@@ -3,9 +3,9 @@
 
 # Driver installation STEP BY STEP:
 
-1. log you on : [smarthings API](https://graph.api.smartthings.com/ide/devices)
+1. log on : [smarthings API](https://graph.api.smartthings.com/ide/devices)
 
-2. click on link "My Device Handlers"
+2. click on "My Device Handlers"
 
 	![Image device Handlers](https://github.com/sinopetechnologies/pictures_readme/blob/master/deviceHandler.PNG)
 
@@ -29,9 +29,9 @@
 
 	![Image change type](https://github.com/sinopetechnologies/pictures_readme/blob/master/type.PNG)
 
-9. Connect to your smartthing app's phone
+9. Connect to your smartthing app
 
-10. click on your Device create in step 8
+10. click on the Device you created in step 8
 
 11. click on parameter
 
