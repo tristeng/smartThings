@@ -52,7 +52,7 @@ metadata {
 def setHeatingSetpoint(temp) {
 
 	if(!isLoggedIn()) {
-		log.debug "Need to login"
+		log.info "Need to login"
 		login()
 	}
 	
@@ -61,7 +61,7 @@ def setHeatingSetpoint(temp) {
 
 	if (temp!=null){
 		temp=temp.toDouble().round(2)
-		log.debug("setHeatingSetpoint -> Value :: ${temp}° ${temperatureUnit}")
+		log.info("setHeatingSetpoint -> Value :: ${temp}° ${temperatureUnit}")
 	}else{
 		temp=null
 	}
@@ -79,7 +79,7 @@ def setHeatingSetpoint(temp) {
 		break;
     }
 
-    log.debug("setHeatingSetpoint _ STEP2 -> NEW Value :: ${temp}° ${temperatureUnit}")
+    log.info("setHeatingSetpoint _ STEP2 -> NEW Value :: ${temp}° ${temperatureUnit}")
 
 	def params = [
 		uri: "https://dev.neviweb.com/api/device/${data.deviceId}/setpoint",
@@ -89,7 +89,7 @@ def setHeatingSetpoint(temp) {
 
     httpPut(params){resp ->
       resp.data
-      log.debug("setHeatingSetpoint -> API response :: ${resp.data}") 
+      log.info("setHeatingSetpoint -> API response :: ${resp.data}") 
     }
 
     runIn(10, poll)        
@@ -98,7 +98,7 @@ def setHeatingSetpoint(temp) {
 def heatingSetpointUp(){
 
 	if(!isLoggedIn()) {
-		log.debug "Need to login"
+		log.info "Need to login"
 		login()
 	}
 	
@@ -131,7 +131,7 @@ def heatingSetpointUp(){
 def heatingSetpointDown(){
 
 	if(!isLoggedIn()) {
-		log.debug "Need to login"
+		log.info "Need to login"
 		login()
 	}
 	
@@ -167,7 +167,7 @@ def manual() {
 def setMode(mode) {
 
 	if(!isLoggedIn()) {
-		log.debug "Need to login"
+		log.info "Need to login"
 		login()
 	}
     
@@ -196,7 +196,7 @@ def setMode(mode) {
     
     httpPut(params)	{resp ->
 		resp.data
-        log.debug("Mode set -> API response :: ${resp.data}")
+        log.info("Mode set -> API response :: ${resp.data}")
     }
 
 	poll()	
@@ -204,14 +204,14 @@ def setMode(mode) {
 
 def poll() {
 
+	if(!isLoggedIn()) {
+		login()
+	}
+
 	def temperature
     def heatingSetpoint
     def range
 	def temperatureUnit = device.latestValue('temperatureUnit')
-	
-	if(!isLoggedIn()) {
-		login()
-	}
 
     def params = [
 		uri: "https://dev.neviweb.com/api/device/${data.deviceId}/data?force=1",
@@ -223,7 +223,7 @@ def poll() {
 		data.status = resp.data
     }
 
-	log.debug("Data device is :: ${data.status}")
+	log.info("Data device is :: ${data.status}")
 
     if(data.auth.user.format.temperature == "c"){
     	temperatureUnit = "celsius"
@@ -271,7 +271,8 @@ def login() {
 
     httpPost(params) { response ->
         data.auth = response.data
-        log.debug("login and password :: OK")
+        log.info("login and password :: OK")
+        log.warn("data.auth")
         gatewayId()
     }
 }
@@ -288,7 +289,7 @@ def logout() {
         httpGet(params) {resp ->
 			data.auth = resp.data
         }
-        log.debug("logout :: OK")  
+        log.info("logout :: OK")  
 }
 
 def gatewayId(){
@@ -314,7 +315,7 @@ def gatewayId(){
 
     	if(name_gateway==gatewayName){
     		data.gatewayId=var.id
-    		log.debug("gateway ID is :: ${data.gatewayId}")
+    		log.info("gateway ID is :: ${data.gatewayId}")
     		deviceId()
     	}
     }
@@ -344,15 +345,14 @@ def deviceId(){
 
     	if(name_device==deviceName){
     		data.deviceId=var.id
-    		log.debug("device ID is :: ${data.deviceId}")
+    		log.info("device ID is :: ${data.deviceId}")
     	}
-    }
-    poll()	
+    }	
 }
 
 def isLoggedIn() {
 
-	log.debug ("Is it login?")
+	log.info ("Is it login?")
 
 	if (data?.auth?.session!=null){
 		try{
@@ -365,7 +365,7 @@ def isLoggedIn() {
 				
 			httpGet(params) {resp ->
 			    if(resp.data.sessionExpired==true){
-			    	log.debug "No session Expired"
+			    	log.info "No session Expired"
 			    	data.auth=""
 			    }
 			}
@@ -378,6 +378,7 @@ def isLoggedIn() {
 					return true
 				}else{
 					return false
+					log.error("not device or gateway with this name")
 				}
 			}
 
