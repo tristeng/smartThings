@@ -51,6 +51,10 @@ metadata {
 
 def setHeatingSetpoint(temp) {
 
+	if(!isLoggedIn()) {
+		login()
+	}
+	
 	def temperatureUnit = device.latestValue('temperatureUnit')
 	def temperature
 
