@@ -3,9 +3,9 @@
 
 # Driver installation STEP BY STEP:
 
-1. log on : [smarthings API](https://graph.api.smartthings.com/ide/devices)
+1. log you on : [smarthings API](https://graph.api.smartthings.com/ide/devices)
 
-2. click on "My Device Handlers"
+2. click on link "My Device Handlers"
 
 	![Image device Handlers](https://github.com/sinopetechnologies/pictures_readme/blob/master/deviceHandler.PNG)
 
@@ -25,19 +25,20 @@
 
 	![Image device & New Device](https://github.com/sinopetechnologies/pictures_readme/blob/master/new_device.PNG)
 
-8. change type of your device with the driver's name and create Device
+8. Fill in the forms  and change type for "Sinope technologie Thermostat" to the end of the list
 
 	![Image change type](https://github.com/sinopetechnologies/pictures_readme/blob/master/type.PNG)
 
-9. Connect to your smartthing app
+9. Connect to your smartthing app's phone
 
-10. click on the Device you created in step 8
+10. Click on your Device create in step 8
 
-11. click on parameter
+11. Click on parameter
 
 	![Image parameter button](https://github.com/sinopetechnologies/pictures_readme/blob/master/apps_sinope.png)
 
-12. fill in the forms
+12. Fill in the forms
 
 	![Image forms](https://github.com/sinopetechnologies/pictures_readme/blob/master/forms.png)
 
+13. Click on "Done"
