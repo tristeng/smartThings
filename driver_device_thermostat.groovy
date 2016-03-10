@@ -26,30 +26,11 @@ metadata {
 	tiles(scale: 2) {
 		multiAttributeTile(name:"temperature", type: "lighting", width: 6, height: 4, canChangeIcon: true, decoration: "flat"){
 			tileAttribute ("device.temperature", key: "PRIMARY_CONTROL") {
-				attributeState("temperature", label:'${currentValue}°',backgroundColors:[
-                // Celsius Color Range
-                [value: 5, color: "#1e9cbb"],
-                [value: 10, color: "#90d2a7"],
-                [value: 15, color: "#44b621"],
-                [value: 20, color: "#f1d801"],
-                [value: 25, color: "#d04e00"],
-                [value: 30, color: "#bc2323"],
-                // Fahrenheit Color Range
-                [value: 41, color: "#1e9cbb"],
-                [value: 50, color: "#90d2a7"],
-                [value: 59, color: "#44b621"],
-                [value: 68, color: "#f1d801"],
-                [value: 77, color: "#d04e00"],
-                [value: 86, color: "#bc2323"]
-                ])
+				attributeState("temperature", label:'${currentValue}°',backgroundColor:"#44B621")
 			}
             tileAttribute ("device.thermostatOperatingState", key: "SECONDARY_CONTROL") {
-           		attributeState("thermostatOperatingState", label:'							Heating power: ${currentValue}%')       		
+           		attributeState("thermostatOperatingState", label:'									Heating power: ${currentValue}%')       		
             }
-
-            tileAttribute("device.realname", key: "OPERATING_STATE") {
-			    
-			}
 		}  
 
 		//Heating Set Point Controls
@@ -72,9 +53,7 @@ def setHeatingSetpoint(temp) {
 
 	def temperatureUnit = device.latestValue('temperatureUnit')
 	def temperature
-
 	temp=temp.toDouble().round(2)
-
 	log.debug("setHeatingSetpoint -> Value :: ${temp}° ${temperatureUnit}")
 	
 	if(!isLoggedIn()) {
@@ -113,20 +92,21 @@ def heatingSetpointUp(){
 	
 	def temperatureUnit = device.latestValue('temperatureUnit')
 	
+	def newSetpoint
+	
 	switch (temperatureUnit) {
 		
 		case "celsius":
 	        newSetpoint = device.currentValue("heatingSetpoint") + 0.5
 	        if (newSetpoint >= 30) {
-				newSetpoint = 30.0
+				newSetpoint = 30
 			}     
 	    break;
 
 	    case "fahrenheit":
 			newSetpoint = device.currentValue("heatingSetpoint") + 1
-			newSetpoint = 
 			if (newSetpoint >= 86) {
-				newSetpoint = 86.0
+				newSetpoint = 86
 			} 
 		break;
 	}
@@ -146,14 +126,14 @@ def heatingSetpointDown(){
 			case "celsius":
 	         	newSetpoint = device.currentValue("heatingSetpoint") - 0.5
 	         	if (newSetpoint <= 5) {
-					newSetpoint = 5.0
+					newSetpoint = 5
 				}      
 	        break;
 	       
 	        default:
 				 newSetpoint = device.currentValue("heatingSetpoint") - 1
 				 if (newSetpoint <= 41) {
-					newSetpoint = 41.0
+					newSetpoint = 41
 				}  
 			break;
 	}
@@ -399,7 +379,7 @@ def FormatTemp(temp){
 	        break;
 
 	        case "fahrenheit":
-	        	return (Math.ceil(cToF(i)).toDouble().round(2)
+	        	return (Math.ceil(cToF(i))).toDouble().round(2)
 	        	log.warn(Math.ceil(cToF(i)).toDouble().round(2))
 	        break;
 	    }
