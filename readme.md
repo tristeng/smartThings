@@ -49,7 +49,7 @@
 13. Click on "Done"
 
 
-<h2 id="en">Installer le pilote étape par étape: </h2>
+<h2 id="fr">Installer le pilote étape par étape: </h2>
 
 
 1. Connectez vous sur : [l' API de smartthings ](https://graph.api.smartthings.com/ide/devices)
