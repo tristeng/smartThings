@@ -1,11 +1,12 @@
 # SmartThings Public Github Repo
 
-![Francais](/fr/)
-![English](/en/)
+<ul>
+<li><a href="#fr" title="Titre">Francais</a></li>
+<li><a href="#en" title="Titre">English</a></li>
+</ul>
 
+<h2 id="en">Driver installation STEP BY STEP: </h2>
 
-[en]: Driver installation STEP BY STEP:
-========================================
 
 1. log on : [smartthings API](https://graph.api.smartthings.com/ide/devices)
 
@@ -48,8 +49,8 @@
 13. Click on "Done"
 
 
-[fr]: Installer le pilote étape par étape:
-==========================================
+<h2 id="en">Installer le pilote étape par étape: </h2>
+
 
 1. Connectez vous sur : [l' API de smartthings ](https://graph.api.smartthings.com/ide/devices)
 
