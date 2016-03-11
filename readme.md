@@ -1,7 +1,7 @@
 # SmartThings Public Github Repo
 
-![Francais][fr]
-![English][en]
+![Francais](/fr/)
+![English](/en/)
 
 
 [en]: Driver installation STEP BY STEP:
