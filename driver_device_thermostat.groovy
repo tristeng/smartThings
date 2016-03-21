@@ -1,8 +1,8 @@
 preferences {
-	input("email", "text", title: "email", description: "E-mail used for logging in to neviweb")
-	input("password", "password", title: "Password", description: "Password used for logging in to neviweb")
-	input("gatewayname", "text", title: "Gateway Name:", description: "Name given to the gateway in neviweb")
-    input("devicename", "text", title: "Device Name:", description: "Name given to the device in neviweb")
+	input("email", "text", title: "E-mail", description: "Your neviweb® account login e-mail")
+	input("password", "password", title: "Password", description: "Your neviweb® account login password")
+	input("gatewayname", "text", title: "Network Name:", description: "Name of your neviweb® network")
+	input("devicename", "text", title: "Device Name:", description: "Name of your neviweb® thermostat")
 }
 
 metadata {
