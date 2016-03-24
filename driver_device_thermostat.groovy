@@ -82,7 +82,7 @@ def setHeatingSetpoint(temp) {
     log.info("setHeatingSetpoint _ STEP2 -> NEW Value :: ${temp}° ${temperatureUnit}")
 
 	def params = [
-		uri: "https://dev.neviweb.com/api/device/${data.deviceId}/setpoint",
+		uri: "https://www.neviweb.com/api/device/${data.deviceId}/setpoint",
 		headers: ['Session-Id' : data.auth.session],
 	 	body: ['temperature': temperature]
 	]
@@ -189,7 +189,7 @@ def setMode(mode) {
     }
 
     def params = [
-		uri: "https://dev.neviweb.com/api/device/${data.deviceId}/mode",
+		uri: "https://www.neviweb.com/api/device/${data.deviceId}/mode",
         headers: ['Session-Id' : data.auth.session],
         body: ['mode': code]
     ]
@@ -214,7 +214,7 @@ def poll() {
 	def temperatureUnit = device.latestValue('temperatureUnit')
 
     def params = [
-		uri: "https://dev.neviweb.com/api/device/${data.deviceId}/data?force=1",
+		uri: "https://www.neviweb.com/api/device/${data.deviceId}/data?force=1",
 		requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
         headers: ['Session-Id' : data.auth.session]
     ]
@@ -263,7 +263,7 @@ def poll() {
 def login() {
 
     def params = [
-        uri: 'https://dev.neviweb.com',
+        uri: 'https://www.neviweb.com',
         path: '/api/login',
         requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
         body: ["email": settings.email, "password": settings.password, "stayConnected": "0"]
@@ -280,7 +280,7 @@ def login() {
 def logout() {
 
       	def 	params = [
-		uri: "https://dev.neviweb.com",
+		uri: "https://www.neviweb.com",
         path: "/api/logout",
        	requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
         headers: ['Session-Id' : data.auth.session]
@@ -295,7 +295,7 @@ def logout() {
 def gatewayId(){
 
 	def params = [
-		uri: "https://dev.neviweb.com",
+		uri: "https://www.neviweb.com",
         path: "/api/gateway",
        	requestContentType: "application/json, text/javascript, */*; q=0.01",
         headers: ['Session-Id' : data.auth.session]
@@ -303,15 +303,21 @@ def gatewayId(){
 
     httpGet(params) { response ->
         data.gateway_list = response.data
+        log.info("Gateway Array ::")
+        log.info(response.data)
     }
 
     def gatewayName=settings.gatewayname
 	gatewayName=gatewayName.toLowerCase().replaceAll("\\s", "")
 
+	log.warn("gateway name forms :: ${gatewayName}")
+	log.info(data.gateway_list)
+
 	for(var in data.gateway_list){
 
     	def name_gateway=var.name
     	name_gateway=name_gateway.toLowerCase().replaceAll("\\s", "")
+    	log.warn(name_gateway);
 
     	if(name_gateway==gatewayName){
     		data.gatewayId=var.id
@@ -324,7 +330,7 @@ def gatewayId(){
 def deviceId(){
 
 	def params = [
-		uri: "https://dev.neviweb.com",
+		uri: "https://www.neviweb.com",
         path: "/api/device",
         query: ['gatewayId' : data.gatewayId],
        	requestContentType: "application/json, text/javascript, */*; q=0.01",
@@ -333,16 +339,22 @@ def deviceId(){
 
     httpGet(params) {resp ->
 		data.devices_list = resp.data
+		log.info("Device Array ::")
+        log.info(resp.data)
     }
 
     def deviceName=settings.devicename
 	deviceName=deviceName.toLowerCase().replaceAll("\\s", "")
 
+	log.warn("Device name forms :: ${deviceName}")
+	log.info(data.devices_list)
+
     for(var in data.devices_list){
 
     	def name_device=var.name
     	name_device=name_device.toLowerCase().replaceAll("\\s", "")
-
+    	log.warn(name_device);
+    	
     	if(name_device==deviceName){
     		data.deviceId=var.id
     		log.info("device ID is :: ${data.deviceId}")
@@ -357,7 +369,7 @@ def isLoggedIn() {
 	if (data?.auth?.session!=null){
 		try{
 			def params = [
-				uri: "https://dev.neviweb.com",
+				uri: "https://www.neviweb.com",
 			    path: "/api/gateway",
 			   	requestContentType: "application/json, text/javascript, */*; q=0.01",
 			    headers: ['Session-Id' : data.auth.session]
