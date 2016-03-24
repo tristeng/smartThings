@@ -82,7 +82,7 @@ def setHeatingSetpoint(temp) {
     log.info("setHeatingSetpoint _ STEP2 -> NEW Value :: ${temp}° ${temperatureUnit}")
 
 	def params = [
-		uri: "https://www.neviweb.com/api/device/${data.deviceId}/setpoint",
+		uri: "https://neviweb.com/api/device/${data.deviceId}/setpoint",
 		headers: ['Session-Id' : data.auth.session],
 	 	body: ['temperature': temperature]
 	]
@@ -189,7 +189,7 @@ def setMode(mode) {
     }
 
     def params = [
-		uri: "https://www.neviweb.com/api/device/${data.deviceId}/mode",
+		uri: "https://neviweb.com/api/device/${data.deviceId}/mode",
         headers: ['Session-Id' : data.auth.session],
         body: ['mode': code]
     ]
@@ -214,7 +214,7 @@ def poll() {
 	def temperatureUnit = device.latestValue('temperatureUnit')
 
     def params = [
-		uri: "https://www.neviweb.com/api/device/${data.deviceId}/data?force=1",
+		uri: "https://neviweb.com/api/device/${data.deviceId}/data?force=1",
 		requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
         headers: ['Session-Id' : data.auth.session]
     ]
@@ -263,7 +263,7 @@ def poll() {
 def login() {
 
     def params = [
-        uri: 'https://www.neviweb.com',
+        uri: 'https://neviweb.com',
         path: '/api/login',
         requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
         body: ["email": settings.email, "password": settings.password, "stayConnected": "0"]
@@ -280,7 +280,7 @@ def login() {
 def logout() {
 
       	def 	params = [
-		uri: "https://www.neviweb.com",
+		uri: "https://neviweb.com",
         path: "/api/logout",
        	requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
         headers: ['Session-Id' : data.auth.session]
@@ -295,7 +295,7 @@ def logout() {
 def gatewayId(){
 
 	def params = [
-		uri: "https://www.neviweb.com",
+		uri: "https://neviweb.com",
         path: "/api/gateway",
        	requestContentType: "application/json, text/javascript, */*; q=0.01",
         headers: ['Session-Id' : data.auth.session]
@@ -330,7 +330,7 @@ def gatewayId(){
 def deviceId(){
 
 	def params = [
-		uri: "https://www.neviweb.com",
+		uri: "https://neviweb.com",
         path: "/api/device",
         query: ['gatewayId' : data.gatewayId],
        	requestContentType: "application/json, text/javascript, */*; q=0.01",
@@ -369,7 +369,7 @@ def isLoggedIn() {
 	if (data?.auth?.session!=null){
 		try{
 			def params = [
-				uri: "https://www.neviweb.com",
+				uri: "https://neviweb.com",
 			    path: "/api/gateway",
 			   	requestContentType: "application/json, text/javascript, */*; q=0.01",
 			    headers: ['Session-Id' : data.auth.session]
