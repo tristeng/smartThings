@@ -303,21 +303,15 @@ def gatewayId(){
 
     httpGet(params) { response ->
         data.gateway_list = response.data
-        log.info("Gateway Array ::")
-        log.info(response.data)
     }
 
     def gatewayName=settings.gatewayname
 	gatewayName=gatewayName.toLowerCase().replaceAll("\\s", "")
 
-	log.warn("gateway name forms :: ${gatewayName}")
-	log.info(data.gateway_list)
-
 	for(var in data.gateway_list){
 
     	def name_gateway=var.name
     	name_gateway=name_gateway.toLowerCase().replaceAll("\\s", "")
-    	log.warn(name_gateway);
 
     	if(name_gateway==gatewayName){
     		data.gatewayId=var.id
@@ -339,21 +333,17 @@ def deviceId(){
 
     httpGet(params) {resp ->
 		data.devices_list = resp.data
-		log.info("Device Array ::")
-        log.info(resp.data)
     }
 
     def deviceName=settings.devicename
 	deviceName=deviceName.toLowerCase().replaceAll("\\s", "")
 
 	log.warn("Device name forms :: ${deviceName}")
-	log.info(data.devices_list)
 
     for(var in data.devices_list){
 
     	def name_device=var.name
     	name_device=name_device.toLowerCase().replaceAll("\\s", "")
-    	log.warn(name_device);
     	
     	if(name_device==deviceName){
     		data.deviceId=var.id
