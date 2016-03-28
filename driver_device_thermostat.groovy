@@ -50,49 +50,54 @@ metadata {
 }
 
 def setHeatingSetpoint(temp) {
-
+	
 	if(!isLoggedIn()) {
 		log.info "Need to login"
 		login()
 	}
-	
-	def temperatureUnit = device.latestValue('temperatureUnit')
-	def temperature
 
-	if (temp!=null){
-		temp=temp.toDouble().round(2)
-		log.info("setHeatingSetpoint -> Value :: ${temp}° ${temperatureUnit}")
+	if(data.error==true){
+		logout()
 	}else{
-		temp=null
+				
+		def temperatureUnit = device.latestValue('temperatureUnit')
+		def temperature
+
+		if (temp!=null){
+			temp=temp.toDouble().round(2)
+			log.info("setHeatingSetpoint -> Value :: ${temp}° ${temperatureUnit}")
+		}else{
+			temp=null
+		}
+		
+		switch (temperatureUnit) {
+			case "celsius":
+				sendEvent(name: 'heatingSetpoint', value: temp, unit: temperatureUnit, state: "heat")
+	         	temperature = temp    
+	        break;
+
+	        case "fahrenheit":
+	        	sendEvent(name: 'heatingSetpoint', value: temp, unit: temperatureUnit, state: "heat")
+				temperature = fToC(temp)
+			break;
+	    }
+
+	    log.info("setHeatingSetpoint _ STEP2 -> NEW Value :: ${temp}° ${temperatureUnit}")
+
+		def params = [
+			uri: "${data.server}",
+			path: "api/device/${data.deviceId}/setpoint",
+			headers: ['Session-Id' : data.auth.session],
+		 	body: ['temperature': temperature]
+		]
+
+	    httpPut(params){
+	    	resp ->resp.data
+	      	log.info("setHeatingSetpoint -> API response :: ${resp.data}") 
+	    }
+
+	    runIn(10, poll)        
 	}
-	
-
-	switch (temperatureUnit) {
-		case "celsius":
-			sendEvent(name: 'heatingSetpoint', value: temp, unit: temperatureUnit, state: "heat")
-         	temperature = temp    
-        break;
-
-        case "fahrenheit":
-        	sendEvent(name: 'heatingSetpoint', value: temp, unit: temperatureUnit, state: "heat")
-			temperature = fToC(temp)
-		break;
-    }
-
-    log.info("setHeatingSetpoint _ STEP2 -> NEW Value :: ${temp}° ${temperatureUnit}")
-
-	def params = [
-		uri: "https://neviweb.com/api/device/${data.deviceId}/setpoint",
-		headers: ['Session-Id' : data.auth.session],
-	 	body: ['temperature': temperature]
-	]
-
-    httpPut(params){resp ->
-      resp.data
-      log.info("setHeatingSetpoint -> API response :: ${resp.data}") 
-    }
-
-    runIn(10, poll)        
 }		
 
 def heatingSetpointUp(){
@@ -101,31 +106,36 @@ def heatingSetpointUp(){
 		log.info "Need to login"
 		login()
 	}
-	
-	def temperatureUnit = device.latestValue('temperatureUnit')
-	
-	def newSetpoint
-	
-	switch (temperatureUnit) {
-		
-		case "celsius":
-	        newSetpoint = device.currentValue("heatingSetpoint") + 0.5
-	        if (newSetpoint >= 30) {
-				newSetpoint = 30
-			}     
-	    break;
 
-	    case "fahrenheit":
-			newSetpoint = device.currentValue("heatingSetpoint") + 1
-			if (newSetpoint >= 86) {
-				newSetpoint = 86
-			} 
-		break;
-	}
+	if(data.error==true){
+		logout()
+	}else{
+
+		def temperatureUnit = device.currentValue('temperatureUnit')
 		
-	log.warn("Setpoint UP -> New Value :: ${newSetpoint}° ${temperatureUnit}")
-	
-	setHeatingSetpoint(newSetpoint)
+		def newSetpoint = device.currentValue("heatingSetpoint")
+
+		switch (temperatureUnit) {
+			
+			case "celsius":
+		        newSetpoint = newSetpoint + 0.5
+		        if (newSetpoint >= 30) {
+					newSetpoint = 30
+				}     
+		    break;
+
+		    case "fahrenheit":
+				newSetpoint = device.currentValue("heatingSetpoint") + 1
+				if (newSetpoint >= 86) {
+					newSetpoint = 86
+				} 
+			break;
+		}
+			
+		log.warn("Setpoint UP -> New Value :: ${newSetpoint}° ${temperatureUnit}")
+		
+		setHeatingSetpoint(newSetpoint)
+	}
 }
 
 def heatingSetpointDown(){
@@ -134,12 +144,17 @@ def heatingSetpointDown(){
 		log.info "Need to login"
 		login()
 	}
-	
-	def newSetpoint
-	
-	def temperatureUnit = device.latestValue('temperatureUnit')
-	switch (temperatureUnit) {
-			
+
+	if(data.error==true){
+		logout()
+	}else{
+
+		def temperatureUnit = device.currentValue('temperatureUnit')
+		
+		def newSetpoint = device.currentValue("heatingSetpoint")
+
+		switch (temperatureUnit) {
+				
 			case "celsius":
 	         	newSetpoint = device.currentValue("heatingSetpoint") - 0.5
 	         	if (newSetpoint <= 5) {
@@ -153,11 +168,12 @@ def heatingSetpointDown(){
 					newSetpoint = 41
 				}  
 			break;
+		}
+			
+		log.warn("Setpoint DOWN -> New Value :: ${newSetpoint}° ${temperatureUnit}")
+			
+		setHeatingSetpoint(newSetpoint)
 	}
-		
-	log.warn("Setpoint DOWN -> New Value :: ${newSetpoint}° ${temperatureUnit}")
-		
-	setHeatingSetpoint(newSetpoint)
 }
 
 def manual() {
@@ -189,13 +205,14 @@ def setMode(mode) {
     }
 
     def params = [
-		uri: "https://neviweb.com/api/device/${data.deviceId}/mode",
+		uri: "${data.server}",
+		path:"api/device/${data.deviceId}/mode",
         headers: ['Session-Id' : data.auth.session],
         body: ['mode': code]
     ]
     
-    httpPut(params)	{resp ->
-		resp.data
+    httpPut(params)	{
+    	resp -> resp.data
         log.info("Mode set -> API response :: ${resp.data}")
     }
 
@@ -208,82 +225,51 @@ def poll() {
 		login()
 	}
 
-	def temperature
-    def heatingSetpoint
-    def range
-	def temperatureUnit = device.latestValue('temperatureUnit')
+	if(data.error==true){
+		logout()
+	}else{
 
-    def params = [
-		uri: "https://neviweb.com/api/device/${data.deviceId}/data?force=1",
-		requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
-        headers: ['Session-Id' : data.auth.session]
-    ]
-     
-    httpGet(params) {resp ->
-		data.status = resp.data
-    }
-
-	log.info("Data device is :: ${data.status}")
-
-    if(data.auth.user.format.temperature == "c"){
-    	temperatureUnit = "celsius"
-    }else{
-    	temperatureUnit = "fahrenheit"
-    }
-    
-    sendEvent(name: "temperatureUnit",   value: temperatureUnit)
-    
-    switch (temperatureUnit) {
-
-        case "celsius":
-        	log.info("celsius temperature")
-        	temperature = FormatTemp(data.status.temperature)
-        	heatingSetpoint = FormatTemp(data.status.setpoint)
-        break;
-
-        case "fahrenheit":
-        	log.info("fahrenheit temperature")
-        	temperature = FormatTemp(data.status.temperature)
-        	heatingSetpoint = FormatTemp(data.status.setpoint)
-        break;
-    }
-
-    if(data.status.mode!=2){
-    	manual()
-    }
-    
-	sendEvent(name: 'temperature', value: temperature, unit: temperatureUnit, state: temperatureType)	
-	sendEvent(name: 'heatingSetpoint', value: heatingSetpoint, unit: temperatureUnit, state: "heat")
-    sendEvent(name: 'thermostatOperatingState', value: "${data.status.heatLevel}")
-    
-	runIn(15, poll)
-	logout()
+		DeviceData()
+	   	
+		runIn(15, poll)
+		logout()
+	}
 }
 
 def login() {
 
+	data.server="https://neviweb.com/"
+
     def params = [
-        uri: 'https://neviweb.com',
-        path: '/api/login',
+        uri: "${data.server}",
+        path: 'api/login',
         requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
         body: ["email": settings.email, "password": settings.password, "stayConnected": "0"]
     ]
 
-    httpPost(params) { response ->
-        data.auth = response.data
-        log.info("login and password :: OK")
-        log.warn("data.auth")
-        gatewayId()
+    httpPost(params) { resp ->
+        data.auth = resp.data
+        if (data.auth.error){
+        	sendEvent(name: 'temperature', value: "ERROR LOGIN", state: temperatureType)
+        	log.error("Authentification failed or request error")
+        	data.error=true
+        	logout()
+    	}else{
+    		log.info("login and password :: OK")
+        	data.error=false
+        	gatewayId()
+    	}
+        
     }
 }
 
 def logout() {
 
-      	def 	params = [
-		uri: "https://neviweb.com",
-        path: "/api/logout",
-       	requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
-        headers: ['Session-Id' : data.auth.session]
+      	def params = [
+			uri: "${data.server}",
+	        path: "api/logout",
+	       	requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
+	        headers: ['Session-Id' : data.auth.session]
     	]
         
         httpGet(params) {resp ->
@@ -295,8 +281,8 @@ def logout() {
 def gatewayId(){
 
 	def params = [
-		uri: "https://neviweb.com",
-        path: "/api/gateway",
+		uri: "${data.server}",
+        path: "api/gateway",
        	requestContentType: "application/json, text/javascript, */*; q=0.01",
         headers: ['Session-Id' : data.auth.session]
     ]
@@ -316,16 +302,24 @@ def gatewayId(){
     	if(name_gateway==gatewayName){
     		data.gatewayId=var.id
     		log.info("gateway ID is :: ${data.gatewayId}")
+    		data.error=false
     		deviceId()
     	}
+    }
+
+    if (data?.gatewayId==null){
+    	sendEvent(name: 'temperature', value: "ERROR GATEWAY", state: temperatureType)
+    	log.error("no gateway with this name or request error")
+    	data.error=true
+    	logout()
     }
 }
 
 def deviceId(){
 
 	def params = [
-		uri: "https://neviweb.com",
-        path: "/api/device",
+		uri: "${data.server}",
+        path: "api/device",
         query: ['gatewayId' : data.gatewayId],
        	requestContentType: "application/json, text/javascript, */*; q=0.01",
         headers: ['Session-Id' : data.auth.session]
@@ -338,8 +332,6 @@ def deviceId(){
     def deviceName=settings.devicename
 	deviceName=deviceName.toLowerCase().replaceAll("\\s", "")
 
-	log.warn("Device name forms :: ${deviceName}")
-
     for(var in data.devices_list){
 
     	def name_device=var.name
@@ -348,7 +340,16 @@ def deviceId(){
     	if(name_device==deviceName){
     		data.deviceId=var.id
     		log.info("device ID is :: ${data.deviceId}")
-    	}
+    		DeviceData()
+    		data.error=false
+    	}	
+    }
+
+    if (data?.deviceId==null){
+    	sendEvent(name: 'temperature', value: "ERROR DEVICE", state: temperatureType)
+    	log.error("no device with this name or request error")
+    	data.error=true
+    	logout()
     }	
 }
 
@@ -359,8 +360,8 @@ def isLoggedIn() {
 	if (data?.auth?.session!=null){
 		try{
 			def params = [
-				uri: "https://neviweb.com",
-			    path: "/api/gateway",
+				uri: "${data.server}",
+			    path: "api/gateway",
 			   	requestContentType: "application/json, text/javascript, */*; q=0.01",
 			    headers: ['Session-Id' : data.auth.session]
 			]
@@ -392,6 +393,56 @@ def isLoggedIn() {
 		return false
 	}
 	
+}
+
+def DeviceData(){
+	def temperature
+    def heatingSetpoint
+    def range
+	def temperatureUnit
+
+   	def params = [
+		uri: "${data.server}api/device/${data.deviceId}/data?force=1",
+		requestContentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        headers: ['Session-Id' : data.auth.session]
+    ]
+    log.info(params)
+    httpGet(params) {resp ->
+		data.status = resp.data
+    }
+
+    log.info("Data device is :: ${data.status}")
+
+    if(data?.auth?.user?.format?.temperature == "c"){
+    	temperatureUnit = "celsius"
+    }else{
+    	temperatureUnit = "fahrenheit"
+    }
+    
+    sendEvent(name: "temperatureUnit",   value: temperatureUnit)
+    
+    switch (temperatureUnit) {
+
+        case "celsius":
+        	log.info("celsius temperature")
+        	temperature = FormatTemp(data.status.temperature)
+        	heatingSetpoint = FormatTemp(data.status.setpoint)
+        break;
+
+        case "fahrenheit":
+        	log.info("fahrenheit temperature")
+        	temperature = FormatTemp(data.status.temperature)
+        	heatingSetpoint = FormatTemp(data.status.setpoint)
+        break;
+    }
+
+    if(data.status.mode!=2){
+    	manual()
+    }
+    
+	sendEvent(name: 'temperature', value: temperature, unit: temperatureUnit, state: temperatureType)	
+	sendEvent(name: 'heatingSetpoint', value: heatingSetpoint, unit: temperatureUnit, state: "heat")
+    sendEvent(name: 'thermostatOperatingState', value: "${data.status.heatLevel}")
 }
 
 def FormatTemp(temp){
