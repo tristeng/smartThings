@@ -90,7 +90,7 @@ def refresh() {
 }
 
 def login() {
-	data.server="https://dev.neviweb.com/"
+	data.server="https://neviweb.com/"
 	data.requested=false
     def params = [
         uri: "${data.server}",
