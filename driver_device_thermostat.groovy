@@ -50,6 +50,10 @@ metadata {
 	}
 }
 
+def setHeatingSetpoint(newSetpoint) {
+	setHeatingSetpoint(newSetpoint , "celsius")
+}
+
 def setHeatingSetpoint(newSetpoint , temperatureUnit) {
 	
 	if(!isLoggedIn()) {
@@ -365,7 +369,8 @@ def DeviceData(){
     
 	sendEvent(name: 'temperature', value: temperature, unit: temperatureUnit)	
 	sendEvent(name: 'heatingSetpoint', value: heatingSetpoint, unit: temperatureUnit)
-    sendEvent(name: 'thermostatOperatingState', value: "${data.status.heatLevel}")
+	sendEvent(name: 'thermostatOperatingState', value: data.status.heatLevel > 0 ? "heating" : "idle")
+	sendEvent(name: 'thermostatMode', value: "heat")
 }
 
 def FormatTemp(temp){
